@@ -5,29 +5,31 @@ echo "Started automated Arch Linux installer
 # 1.1. Get WiFi credentials (OPTIONAL)
 echo "Do you want to setup a wi-fi connection (for the installation)? [Y/n]"
 read -r USE_WIFI
-if [ "$USE_WIFI" = "Y" || "$USE_WIFI" = "y" ]
+if [ "$USE_WIFI" = "Y" | "$USE_WIFI" = "y" | "$USE_WIFI" = "" ]
 then
 	if [ "$WIFI_SID" = "" ]
 	then
 		echo "Please specify your WIFI SID below:"
-		while [ "$WIFI_SID" = "" ]
+		while [ "$WIFI_SID" = "" ]; do
 			read -r SID
 			export "WIFI_SID=$SID"
 			if [ "$WIFI_SID" = "" ]
 				echo "No value provided for wifi sid, please specify:"
 			fi
+		done
 	fi
 
 	if [ "$WIFI_PASS" = "" ]
 	then
 		# TODO: This section is repeated, figure out how to write POSIX shell functions
 		echo "Please specify your WIFI password below:"
-		while [ "$WIFI_PASS" = "" ]
+		while [ "$WIFI_PASS" = "" ]; do
 			read -r PASS
 			export "WIFI_SID=$PASS"
 			if [ "$WIFI_PASS" = "" ]
 				echo "No value provided for wifi password, please specify:"
 			fi
+		done
 	fi
 fi
 
