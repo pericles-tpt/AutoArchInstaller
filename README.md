@@ -15,7 +15,7 @@ This script aims to be **POSIX compliant** and to **not require any additional d
 
 - [ ] Write logic to prompt user for all environment variable that are not found
 - [X] Create entrypoint for installation script(s) (i.e. `main.sh`)
-- [X] Write automated WiFI installation
+- [X] (OPTIONAL) Write automated WiFI installation
 - [ ] Write disk formatting and partitioning logic
 - [ ] Generate `fstab`
 - [ ] Install packages to installation root
@@ -29,9 +29,9 @@ This script aims to be **POSIX compliant** and to **not require any additional d
 - [ ] Install `sudo` and edit `visudo`
 - [ ] Install grub and setup boot files
 - [ ] Setup swap
-- [ ] Install/configure any remaining hardware specific packages/configuration
-- [ ] Write ansible download and run logic
-  - [ ] Change to root directory of installation `arch-chroot`
+- [ ] (OPTIONAL) Install/configure any remaining hardware specific packages/configuration
+- [ ] (OPTIONAL) Write ansible download and run logic
   - [ ] Install dependencies for ansible
   - [ ] Download `zip` and unzip it
   - [ ] Run ansible playbook
+- [ ] Reboot!
