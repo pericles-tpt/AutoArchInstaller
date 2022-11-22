@@ -2,6 +2,8 @@
 
 A project to completely automate the arch linux installation process from a live USB to a fully configured installation.
 
+The goal of this project is to create a script that "front loads" all the user interaction for the process to achieve a *mostly* hands-free installation experience. In addition, if the user specifies it, an ansible script can be run to complete all of the post-installation steps and setup the rest of the user's environment.
+
 ## Requirements
 This script aims to be **POSIX compliant** and to **not require any additional dependencies** (in addition to the default arch live installer). 
 
@@ -11,7 +13,7 @@ This script aims to be **POSIX compliant** and to **not require any additional d
 2. Run the installation scripts to get to a bootable arch linux environment (including some hardware specific drivers e.g. intel, amd, nvidia, etc)
 3. IF a link is provided to an ansible `zip` file. Download, unzip and *attempt* to run it.
 
-## Goals
+## TO DO
 
 - [ ] Write logic to prompt user for all environment variable that are not found
 - [X] Create entrypoint for installation script(s) (i.e. `main.sh`)
