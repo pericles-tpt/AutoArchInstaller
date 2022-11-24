@@ -45,6 +45,12 @@ then
 	lsblk | grep disk | while read j; do	
 		id=$(echo $j | awk '{print $1}')
 		size=$(echo $j | awk '{print $4}')
+
+		# Used
+		diskInfo=$(fdisk -l /dev/"$id")
+		totalSize=$(echo $diskInfo | head -n 1 | awk '{print $3}')
+		echo "$totalSize"
+
 		model=$(cat /sys/class/block/"$id"/device/model)
 		echo "* $id ($size): $model"
 	done 
