@@ -51,7 +51,7 @@ then
 		totalSizeBytes=$(echo $diskInfo | head -n 1 | awk '{print $4}')
 		usedSizeBytes=0
 		fdisk -l /dev/$id | grep "^/dev/$id[\d]*" | awk '{print $5}' | while read k; do
-			partSize=0
+			partSizeBytes=0
 			num=$(echo $k | sed 's/.$//')
 			if [ $(echo "${k: -1}") = "B" ];
 			then
@@ -75,7 +75,7 @@ then
 				echo "Sorry we can't handle EXABYTES of storage..."
 				exit 1
 			fi
-			$((usedSize=usedSize+partSize))
+			$((usedSizeBytes=usedSizeBytes+partSizeBytes))
 		done
 		echo $((usedSize/totalSize))
 		model=$(cat /sys/class/block/"$id"/device/model)
