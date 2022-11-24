@@ -63,14 +63,18 @@ then
 			then
 				$((partSize=$num*1024*1024))
 			else if [ $(echo "${k: -1}") = "G" ];
+			then
 				$((partSize=$num*1024*1024*1024))
 			else if [ $(echo "${k: -1}") = "T" ];
+			then
 				$((partSize=$num*1024*1024*1024*1024))
 			else if [ $(echo "${k: -1}") = "P" ];
+			then
 				$((partSize=$num*1024*1024*1024*1024*1024))
 			else
 				echo "Sorry we can't handle EXABYTES of storage..."
 				exit 1
+			fi
 			$((usedSize=usedSize+partSize))
 		done
 		echo $((usedSize/totalSize))
