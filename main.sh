@@ -48,9 +48,32 @@ then
 
 		# Used
 		diskInfo=$(fdisk -l /dev/"$id")
-		totalSize=$(echo $diskInfo | head -n 1 | awk '{print $3}')
-		echo "$totalSize"
-
+		totalSizeBytes=$(echo $diskInfo | head -n 1 | awk '{print $4}')
+		usedSizeBytes=0
+		fdisk -l /dev/$id | grep "^/dev/$id[\d]*" | awk '{print $5}' | while read k; do
+			partSize=0
+			num=$(echo $k | sed 's/.$//')
+			if [ $(echo "${k: -1}") = "B" ];
+			then
+				$((partSize=$num))
+			else if [ $(echo "${k: -1}") = "K" ];
+			then
+				$((partSize=$num*1024))
+			else if [ $(echo "${k: -1}") = "M" ];
+			then
+				$((partSize=$num*1024*1024))
+			else if [ $(echo "${k: -1}") = "G" ];
+				$((partSize=$num*1024*1024*1024))
+			else if [ $(echo "${k: -1}") = "T" ];
+				$((partSize=$num*1024*1024*1024*1024))
+			else if [ $(echo "${k: -1}") = "P" ];
+				$((partSize=$num*1024*1024*1024*1024*1024))
+			else
+				echo "Sorry we can't handle EXABYTES of storage..."
+				exit 1
+			$((usedSize=usedSize+partSize))
+		done
+		echo $((usedSize/totalSize))
 		model=$(cat /sys/class/block/"$id"/device/model)
 		echo "* $id ($size): $model"
 	done 
