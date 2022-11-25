@@ -12,7 +12,7 @@ then
 	then
 		echo "1.1.1: Please specify your WIFI SID below:"
 		while [ "$WIFI_SID" = "" ]; do
-			read -r SID
+			read -p "> " SID
 			export "WIFI_SID=$SID"
 			if [ "$WIFI_SID" = "" ]
 			then
@@ -26,7 +26,7 @@ then
 		# TODO: This section is repeated, figure out how to write POSIX shell functions
 		echo "1.1.2: Please specify your WIFI password below:"
 		while [ "$WIFI_PASS" = "" ]; do
-			read -r PASS
+			read -s -p "> " PASS
 			export "WIFI_PASS=$PASS"
 			if [ "$WIFI_PASS" = "" ]
 			then
@@ -34,57 +34,70 @@ then
 			fi
 		done
 	fi
+	echo ""
 fi
 
 # 1.2. Get the target drive
 if [ "$TARGET_DRIVE" = "" ]
 then
 	echo ""
-	echo "1.2: Which disk would you like to install to (e.g. 'sda', 'sdb', 'nvme0', etc
-	WARNING: This disk will be wiped:"
+	echo "1.2: Which disk would you like to install to (e.g. 'sda', 'sdb', 'nvme0', etc):"
 	lsblk | grep disk | while read j; do	
 		id=$(echo $j | awk '{print $1}')
 		size=$(echo $j | awk '{print $4}')
 
 		# Used
 		diskInfo=$(fdisk -l /dev/"$id")
-		totalSizeBytes=$(echo $diskInfo | head -n 1 | awk '{print $4}')
+		totalSizeBytes=$(echo $diskInfo | head -n 1 | awk '{print $5}')
 		usedSizeBytes=0
-		fdisk -l /dev/$id | grep "^/dev/$id[\d]*" | awk '{print $5}' | while read k; do
+		capacityUsed=$(fdisk -l /dev/$id | grep "^/dev/$id[\d]*" | awk '{print $5}' | while read k; do
 			partSizeBytes=0
-			num=$(echo $k | sed 's/.$//')
+			# Num is rounded to NEAREST integer
+			num=$(echo $k | sed 's/.$//' | awk '{print int($1+0.5)}')
+			
 			if [ $(echo "${k: -1}") = "B" ];
 			then
-				$((partSize=$num))
-			else if [ $(echo "${k: -1}") = "K" ];
+				partSizeBytes=$num
+			elif [ $(echo "${k: -1}") = "K" ];
 			then
-				$((partSize=$num*1024))
-			else if [ $(echo "${k: -1}") = "M" ];
+				partSizeBytes=$((num*1024))
+			elif [ $(echo "${k: -1}") = "M" ];
 			then
-				$((partSize=$num*1024*1024))
-			else if [ $(echo "${k: -1}") = "G" ];
+				partSizeBytes=$((num*1024*1024))
+			elif [ $(echo "${k: -1}") = "G" ];
 			then
-				$((partSize=$num*1024*1024*1024))
-			else if [ $(echo "${k: -1}") = "T" ];
+				partSizeBytes=$((num*1024*1024*1024))
+			elif [ $(echo "${k: -1}") = "T" ];
 			then
-				$((partSize=$num*1024*1024*1024*1024))
-			else if [ $(echo "${k: -1}") = "P" ];
+				partSizeBytes=$((num*1024*1024*1024*1024))
+			elif [ $(echo "${k: -1}") = "P" ];
 			then
-				$((partSize=$num*1024*1024*1024*1024*1024))
+				partSizeBytes=$((num*1024*1024*1024*1024*1024))
 			else
 				echo "Sorry we can't handle EXABYTES of storage..."
 				exit 1
 			fi
-			$((usedSizeBytes=usedSizeBytes+partSizeBytes))
-		done
-		echo $((usedSize/totalSize))
-		model=$(cat /sys/class/block/"$id"/device/model)
-		echo "* $id ($size): $model"
+			usedSizeBytes=$((usedSizeBytes+partSizeBytes))
+			pcFree=$(awk "BEGIN {print int((($usedSizeBytes/$totalSizeBytes)*100)+0.5)}")
+			if [ $pcFree -gt 100 ];
+			then
+				pcFree=100
+			fi
+			echo $pcFree
+		done | tail -n 1)
+		model=$(cat /sys/class/block/"$id"/device/model | tr -d ' ')
+		isUSB=$(find /dev/disk/by-id/ -lname "*""$id" | grep usb | wc -l)
+		if [ $isUSB -gt 0 ];
+		then 
+			echo "* $id ($size, $capacityUsed% USED): $model (USB)"
+		else
+			echo "* $id ($size, $capacityUsed% USED): $model"
+		fi
 	done 
 
 	TARGET_VALID=0
 	while [ $TARGET_VALID == 0 ]; do
-		read -r TARGET_DRIVE
+		read -p "> " TARGET_DRIVE
 		TARGET_VALID=$(fdisk -l /dev/$TARGET_DRIVE 2>&1 | grep -v 'cannot' | wc -l)
 		if [ $TARGET_VALID == 0 ]
 		then
