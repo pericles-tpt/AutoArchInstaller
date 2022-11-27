@@ -12,7 +12,8 @@ This script aims to be **POSIX compliant** and to **not require any additional d
 ## Installer Stages
 1. Prompt the user for all the required environment variables, for a completely 'hands free' installation
   - Will only prompt for environment variables that aren't already set when the script starts
-2. Run the installation scripts to get to a bootable arch linux environment (including some hardware specific drivers e.g. intel, amd, nvidia, etc)
+2. Run the installation scripts to get to a bootable arch linux environment
+  - EXTRA: IF auto wifi setup fails, ask to search for WiFi drivers for hardware, lookup corresponding software, once found ask the user if they'd like to install it (indicate if it's non-free) then install.
 3. IF a link is provided to an ansible `zip` file. Download, unzip and *attempt* to run it.
 
 ## TO DO
