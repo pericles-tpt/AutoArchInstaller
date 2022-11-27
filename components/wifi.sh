@@ -1,3 +1,5 @@
+#!/bin/sh
+
 ifaces=$(ip addr | grep ': <' | sed 's/://' | awk '{print $2}' | tr -d ':')
 
 fail_iface=0
