@@ -4,6 +4,8 @@ A project to completely automate the arch linux installation process from a live
 
 The goal of this project is to create a script that "front loads" all the user interaction for the process to achieve a *mostly* hands-free installation experience. In addition, if the user specifies it, an ansible script can be run to complete all of the post-installation steps and setup the rest of the user's environment.
 
+**WARNING:** This script is INCOMPLETE, as such it's highly recommended NOT to use it yet, using this script in its current state may result in DATA LOSS. If you'd like to test the script it's highly recommended to test it on a computer/VM WITHOUT ACCESS TO ANY EXISTING DATA.
+
 ## Requirements
 This script aims to be **POSIX compliant** and to **not require any additional dependencies** (in addition to the default arch live installer). 
 
