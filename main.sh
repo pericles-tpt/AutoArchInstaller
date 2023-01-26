@@ -117,19 +117,55 @@ then
 		fi
 	done
 else
-	echo "hi"
+	echo "WIP: We haven't finished this branch yet, support to come"
+	exit
 	# Deconstruct partition scheme into arguments
 fi
 
 
 # 4. Partitions for which directories, how many
 # 	Minimally need root but can have more
-#	4.1. Keep prompting the user for more partitions
 partitionStr=""
 ROOT_SPECIFIED=0
 while [ $ROOT_SPECIFIED == 0 ]; do
-	echo "Please specify how much"
+	echo "Please specify the desired size (in GiB) of your root partition"
 	read -p "> " ROOT_SIZE
+done
+
+#	4.1. Keep prompting the user for more partitions
+# WARNING: This just checks that the path is of the correct structure (i.e. matches regex "^\/[a-z]+$")
+#		   but it doesn't 'sanity' check it, i.e. /asjkajsdh will be accepted
+ALL_PARTITIONS_DEFINED=0
+while [ $ALL_PARTITIONS_DEFINED == 0 ]; do
+	echo "Would you like to create additional partitions (e.g. /home, /usr, etc)? [Y/n]"
+	read -p "> " NEW_PART
+	if [ "$NEW_PART" = "Y" ] | [ "$NEW_PART" = "y" ] | [ "$NEW_PART" = "" ]
+	then
+		NEW_PATH=""
+		while [ $(echo "$NEW_PATH" | grep \'$^\/[a-z]+$\' | wc -l) == 0] && ["$NEW_PATH" != "QUIT" ]; do
+			echo "What 'path' would you like to map to your new partion (must be a '/' followed by [a-z]+, e.g. /home)?"
+			echo "NOTE: Type 'QUIT' to cancel creating new partitions"
+			read -p "> " NEW_PATH
+		done
+
+		if [ "$NEW_PATH" = "QUIT" ]
+		then
+			ALL_PARTITIONS_DEFINED=1
+		else 
+			NEW_SIZE=""
+			while [ $(echo "$NEW_SIZE" | grep \'$\d+^\' | wc -l) == 0] && ["$NEW_SIZE" != "QUIT" ]; do
+				echo "What size would you like your '$NEW_PATH' partition to be (in GiB)?"
+				echo "NOTE: Type 'QUIT' to cancel creating new partitions"
+				read -p "> " NEW_SIZE
+			done
+			if [ "$NEW_SIZE" = "QUIT" ]
+			then
+				ALL_PARTITIONS_DEFINED=1
+			else
+		fi
+	else
+		ALL_PARTITIONS_DEFINED=1
+	fi
 done
 
 # 1.3. Get the user's desired partition scheme
@@ -201,4 +237,4 @@ echo $TARGET_DRIVE
 
 # 5i. Setup swap
 
-# 6. Ask about any specific architecture drivers / microcode (intel/amd microcode), (intel/amd (same) or nvidia gpu drivers)
+# 6. Ask about any specific architecture drivers / microcode (intel/amd microcode), (intel/amd (same) or nvidia gpu drivers) [SKIP: Should be done with Ansible script]
