@@ -4,6 +4,8 @@ ifaces=$(ip addr | grep ': <' | sed 's/://' | awk '{print $2}' | tr -d ':')
 
 fail_iface=0
 total_iface=0
+WIFI_SID=$1
+WIFI_PASS=$2
 
 if [ "$WIFI_SID" = "" ] || [ "$WIFI_PASS" = "" ]
 then
