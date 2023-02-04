@@ -1,49 +1,56 @@
-import archinstall, getpass, urllib2, sleep
+import archinstall, getpass, urllib2, sleep, subprocess
+
+# FUNCTIONS
+def test_internet_connection(num_retries, timeout_seconds):
+    connection_success = False
+    for i in range(num_retries):
+        # SOURCE: The below try/except block to test internet connection was found here:
+        #         https://stackoverflow.com/a/3764660
+        try:
+            urllib2.urlopen('https://archlinux.org/', timeout=timeout_seconds)
+            connection_success = True
+        except urllib2.URLError as err: 
+            connection_success = False
+        sleep(1)
+    return connection_success
+
+def prompt_input(prompt_msg, value_key, allow_quit = False):
+    sure = False
+    while (not sure):
+        value = input(prompt_msg)
+        if allow_quit and value == 'q':
+            break
+        confirm = input(f"The {value_key} you provided is '{value}', are you sure? [Y/n]")
+        sure    = (confirm.lower() == 'y')
+    return value
 
 print('''## Started automated Arch Linux installer ##
-This script using a combination of:
+This script uses a combination of:
     The existing `archinstall` python module
     Some custom scripts for tasks like trying to connect to WiFi interfaces''')
 
 # 1. Prompt user for each required environment variable (if not already set)
 # 1.1. Get WiFi credentials (OPTIONAL)
 print("1.0. Network Connection Setup")
-connectionSuccess = False
-for i in range(3):
-    # SOURCE: The below try/except block to test internet connection was found here:
-    #         https://stackoverflow.com/a/3764660
-    try:
-        urllib2.urlopen('https://archlinux.org/', timeout=5)
-        connectionSuccess = True
-    except urllib2.URLError as err: 
-        connectionSuccess = False
-    sleep(1)
+connection_success = test_internet_connection(3, 5)
 
-if not connectionSuccess:
-    useWifi = input("1.1. Do you want to setup a wi-fi connection (for the installation)? [Y/n]")
-    if useWifi.lower() == 'y':
-        sure = False
-        while (not sure):
-            wifiSID = input("1.1.1. What is your WiFi SID (type 'q' to cancel WiFi setup)?")
-            if wifiSID == 'q':
-                break
-            confirm = input("The SID you provided is '%s', are you sure? [Y/n]")
-            sure    = (confirm.lower() == 'y' or wifiSID == 'q')
+if not connection_success:
+    print("Failed to connect to the internet...")
+    use_wifi = input("1.1. Do you want to setup a wi-fi connection (for the installation)? [Y/n]")
+    if use_wifi.lower() == 'y':
+        prompt_msg = "1.1.1. What is your WiFi SID (type 'q' to cancel WiFi setup)?"
+        wifi_sid = prompt_input(prompt_msg, "SID", True)
 
-        sure = False
-        while (not sure):
-            wifiPass = input("1.1.2. What is your WiFi Password (type 'q' to cancel WiFi setup)?")
-            if wifiPass == 'q':
-                break
-            confirm = input("The Password you provided is '%s', are you sure? [Y/n]")
-            sure    = (confirm.lower() == 'y' or wifiPass == 'q')
+        prompt_msg = "1.1.2. What is your WiFi Password (type 'q' to cancel WiFi setup)?"
+        wifi_pass = prompt_input(prompt_msg, "Password", True)
 
-        if wifiSID != 'q' and wifiPass != 'q':
-            # Run script here
-            # echo " NOT CONNECTED TO INTERNET: Attempting automatic wi-fi setup now if you DON'T have wi-fi plug in ethernet now"
-            # chmod +x ./components/wifi-setup.sh
-            # sh ./components/wifi-setup.sh
+        if wifi_sid != 'q' and wifi_pass != 'q':
+            subprocess.call(['sh', './components/wifi-setup.sh', wifi_sid, wifi_pass])
+        else:
+            print("Unable to access the internet over a wired or wireless interface, exiting...")
+            exit(1)
 
+disk_options = archinstall.all_blockdevices()
 # 1.2. Get the target drive
 if [ "$TARGET_DRIVE" = "" ]
 then
@@ -244,3 +251,4 @@ echo $TARGET_DRIVE
 # 5i. Setup swap
 
 # 6. Ask about any specific architecture drivers / microcode (intel/amd microcode), (intel/amd (same) or nvidia gpu drivers) [SKIP: Should be done with Ansible script]
+
